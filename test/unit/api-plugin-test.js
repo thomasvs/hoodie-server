@@ -77,6 +77,18 @@ describe('api plugin', function () {
       });
     });
   });
+  
+  describe('extractToken', function () {
+    it('should return the token if there is one', function () {
+      var ret = plugin.internals.extractToken(['AuthSession=some-token; Version=bla bla bla']);
+      expect(ret).to.eql('some-token');
+    });
+
+    it('should return undefined if there is none', function () {
+      var ret = plugin.internals.extractToken(['Some=other-cookie; Version=bla bla bla']);
+      expect(ret).to.be.an('undefined');
+    });
+  });
 });
   /*
   extractToken: function (cookieHeader) {
