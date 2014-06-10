@@ -1,6 +1,7 @@
 var expect = require('expect.js');
 var plugin = require('../../lib/server/plugins/api/index');
 
+var Stream = require('stream');
 var _ = require('lodash');
 
 describe('api plugin', function () {
@@ -89,41 +90,156 @@ describe('api plugin', function () {
       expect(ret).to.be.an('undefined');
     });
   });
-});
-  /*
-  extractToken: function (cookieHeader) {
-    return (/AuthSession=(.*); Version(.*)/).exec(cookieHeader[0])[1];
-  },
-  addCorsAndBearerToken: function (err, res, request, reply) {
-    if (err) {
-      reply(err).code(500);
-      return;
-    }
-    nipple.read(res, function (err, body) {
-      var data, resp;
-      if (err) {
-        reply(err).code(500);
-        return;
-      }
-      data = JSON.parse(body);
-      if (Array.isArray(res.headers['set-cookie'])) {
-        data.authToken = internals.extractToken(res.headers['set-cookie']);
-        delete res.headers['set-cookie'];
-      }
-
-      if (request.method === 'options') {
-        res.statusCode = 200;
-      }
-
-      resp = reply(data).code(res.statusCode).hold();
-      resp.headers = res.headers;
-      
-      resp.headers['Access-Control-Allow-Origin'] = request.headers.origin || '*';
-      resp.headers['Access-Control-Allow-Headers'] = 'Authorization, Content-Length, Content-Type, If-Match, If-None-Match, Origin, X-Requested-With';
-      resp.headers['Access-Control-Expose-Headers'] = 'Content-Type, Content-Length, ETag';
-      resp.headers['Access-Control-Allow-Methods'] = 'GET, PUT, POST, DELETE';
-      resp.headers['Access-Control-Allow-Credentials'] = 'true';
-      resp.send();
+  
+  describe('addCorseAndBearerToken', function () {
+    //FIXME: this test passes even if the callback is not called
+    it('should return a 500 if there is an error', function () {
+      plugin.internals.addCorsAndBearerToken('something went wrong', {}, {}, function (err) {
+        expect(err).to.eql('something went wrong');
+        return {
+          code: function(statusCode) {
+            expect(statusCode).to.eql(500);
+          }
+        };
+      });
     });
-  }
-  */
+
+    //FIXME: this test passes even if the callback is not called
+    it('should return a 500 if nipple.read fails', function () {
+      var stream = new Stream();
+
+      stream.pipe = function(dest) {
+        dest.write('the body');
+      };
+      plugin.internals.addCorsAndBearerToken(null, stream, {}, function (err) {
+        expect(err).to.eql('nipple.read failed');
+        return {
+          code: function(statusCode) {
+            expect(statusCode).to.eql(500);
+          }
+        };
+      });
+    });
+    
+    //FIXME: this test passes even if the callback is not called
+    it('should call reply and hold', function () {
+      var stream = new Stream();
+
+      stream.pipe = function(dest) {
+        dest.write(JSON.stringify({ the: 'body' }));
+      };
+      plugin.internals.addCorsAndBearerToken(null, stream, {}, function (data) {
+        expect(data).to.eql({the: 'body'});
+        return {
+          code: function(statusCode) {
+            expect(statusCode).to.eql(200);
+            return {
+              hold: function () {
+                function Resp() {};
+                Resp.prototype.send = function() {
+                  expect(this.headers).to.be.an('object');
+                };
+                return new Resp();
+              }
+            };
+          }
+        };
+      });
+    });
+
+    //FIXME: this test passes even if the callback is not called
+    it('should set status 200 for OPTIONS requests', function () {
+      var stream = new Stream();
+
+      stream.pipe = function(dest) {
+        dest.write(JSON.stringify({ the: 'body' }));
+      };
+      stream.headers = {
+        some: 'header',
+      };
+      stream.statusCode = 405;
+      plugin.internals.addCorsAndBearerToken(null, stream, { method: 'options' }, function (data) {
+        expect(data).to.eql({the: 'body'});
+        return {
+          code: function(statusCode) {
+            expect(statusCode).to.eql(200);
+            return {
+              hold: function () {}
+            };
+          }
+        };
+      });
+    });
+    
+    //FIXME: this test passes even if the callback is not called
+    it('should pass through the headers and add CORS headers', function () {
+      var stream = new Stream();
+
+      stream.pipe = function(dest) {
+        dest.write(JSON.stringify({ the: 'body' }));
+      };
+      stream.headers = {
+        some: 'header',
+      };
+      stream.statusCode = 200;
+      plugin.internals.addCorsAndBearerToken(null, stream, {
+        method: 'get',
+        headers: { origin: 'some-origin' }
+      }, function (data) {
+        expect(data).to.eql({the: 'body'});
+        return {
+          code: function(statusCode) {
+            expect(statusCode).to.eql(200);
+            return {
+              hold: function () {
+                function Resp() {};
+                Resp.prototype.send = function() {
+                  expect(this.headers).to.eql({
+                    some: 'header',
+                    'Access-Control-Allow-Origin': 'some-origin',
+                    'Access-Control-Allow-Headers': 'Authorization, Content-Length, Content-Type, If-Match, If-None-Match, Origin, X-Requested-With',
+                    'Access-Control-Expose-Headers': 'Content-Type, Content-Length, ETag',
+                    'Access-Control-Allow-Methods': 'GET, PUT, POST, DELETE',
+                    'Access-Control-Allow-Credentials': 'true'
+                  });
+                };
+                return new Resp();
+              }
+            };
+          }
+        };
+      });
+    });
+
+    //FIXME: this test passes even if the callback is not called
+    it('should strip any set-cookie headers and add them into the body', function () {
+      var stream = new Stream();
+
+      stream.pipe = function(dest) {
+        dest.write(JSON.stringify({ the: 'body' }));
+      };
+      stream.headers = {
+        some: 'header',
+        'set-cookie': ['AuthSession=some-token; Version=bla bla bla']
+      };
+      stream.statusCode = 200;
+      plugin.internals.addCorsAndBearerToken(null, stream, {}, function (data) {
+        expect(data).to.eql({the: 'body', authToken: 'some-token'});
+        return {
+          code: function(statusCode) {
+            expect(statusCode).to.eql(200);
+            return {
+              hold: function () {
+                function Resp() {};
+                Resp.prototype.send = function() {
+                  expect(this.headers['set-cookie']).to.be.an('undefined');
+                };
+                return new Resp();
+              }
+            };
+          }
+        };
+      });
+    });
+  });
+});
