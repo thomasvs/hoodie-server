@@ -10,6 +10,7 @@ require('./unit/plugins-test');
 require('./unit/nodejitsu_server-test');
 require('./unit/server-test');
 require('./unit/api-plugin-test');
+/*
 require('./unit/utils-test');
 require('./unit/couch-utils-test');
 require('./unit/helpers-pack_hoodie-test');
@@ -18,3 +19,4 @@ require('./integration/handle_404');
 require('./integration/assets');
 require('./integration/block-all-dbs');
 require('./integration/cors');
+*/
