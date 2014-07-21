@@ -4,8 +4,8 @@ var http = require('http');
 var os = require('os');
 
 var config = {
-  www_port: 5031,
-  admin_port: 5041,
+  www_port: 5032,
+  admin_port: 5042,
   admin_password: '12345'
 };
 
@@ -14,9 +14,6 @@ describe('setting CORS headers', function () {
   before(function (done) {
     hoodie_server.start(config, done);
   });
-
-  // TODO: I guess we should kill the server once we are done with the tests
-  //after(function (done) {});
 
   it('should respond to OPTIONS with the right CORS headers when no origin is given', function (done) {
     http.get({
