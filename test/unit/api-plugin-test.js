@@ -92,20 +92,19 @@ describe('api plugin', function () {
   });
   
   describe('addCorseAndBearerToken', function () {
-    //FIXME: this test passes even if the callback is not called
-    it('should return a 500 if there is an error', function () {
+    it('should return a 500 if there is an error', function (done) {
       plugin.internals.addCorsAndBearerToken('something went wrong', {}, {}, function (err) {
         expect(err).to.eql('something went wrong');
         return {
           code: function(statusCode) {
             expect(statusCode).to.eql(500);
+            done();
           }
         };
       });
     });
 
-    //FIXME: this test passes even if the callback is not called
-    it('should return a 500 if nipple.read fails', function () {
+    it('should return a 500 if nipple.read fails', function (done) {
       var stream = new Stream();
 
       stream.pipe = function(dest) {
@@ -116,13 +115,13 @@ describe('api plugin', function () {
         return {
           code: function(statusCode) {
             expect(statusCode).to.eql(500);
+            done();
           }
         };
       });
     });
     
-    //FIXME: this test passes even if the callback is not called
-    it('should call reply and hold', function () {
+    it('should call reply and hold', function (done) {
       var stream = new Stream();
 
       stream.pipe = function(dest) {
@@ -138,6 +137,7 @@ describe('api plugin', function () {
                 function Resp() {};
                 Resp.prototype.send = function() {
                   expect(this.headers).to.be.an('object');
+                  done();
                 };
                 return new Resp();
               }
@@ -147,7 +147,6 @@ describe('api plugin', function () {
       });
     });
 
-    //FIXME: this test passes even if the callback is not called
     it('should set status 200 for OPTIONS requests', function () {
       var stream = new Stream();
 
@@ -171,8 +170,7 @@ describe('api plugin', function () {
       });
     });
     
-    //FIXME: this test passes even if the callback is not called
-    it('should pass through the headers and add CORS headers', function () {
+    it('should pass through the headers and add CORS headers', function (done) {
       var stream = new Stream();
 
       stream.pipe = function(dest) {
@@ -202,6 +200,7 @@ describe('api plugin', function () {
                     'Access-Control-Allow-Methods': 'GET, PUT, POST, DELETE',
                     'Access-Control-Allow-Credentials': 'true'
                   });
+                  done();
                 };
                 return new Resp();
               }
@@ -211,8 +210,7 @@ describe('api plugin', function () {
       });
     });
 
-    //FIXME: this test passes even if the callback is not called
-    it('should strip any set-cookie headers and add them into the body', function () {
+    it('should strip any set-cookie headers and add them into the body', function (done) {
       var stream = new Stream();
 
       stream.pipe = function(dest) {
@@ -234,6 +232,7 @@ describe('api plugin', function () {
                 Resp.prototype.send = function() {
                   expect(this.headers['set-cookie']).to.be.an('undefined');
                 };
+                done();
                 return new Resp();
               }
             };
