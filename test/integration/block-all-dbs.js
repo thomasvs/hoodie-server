@@ -1,7 +1,6 @@
 var expect = require('expect.js');
 var hoodie_server = require('../../');
 var http = require('http');
-var os = require('os');
 
 var config = {
   www_port: 5051,
