@@ -55,7 +55,6 @@
   },
   "hoodie": {
     "plugins": [
-      "hoodie-plugin-users"
     ]
   },
   "codename": "hunky-dory-cheetah"
