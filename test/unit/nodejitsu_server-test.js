@@ -1,17 +1,17 @@
-var Lab = require('lab');
+var expect = require('expect.js');
 
 var Hapi = require('hapi');
 var server = new Hapi.Server();
 var pack = server.pack;
 
-Lab.experiment('Nodejitsu plugin', function() {
+describe('Nodejitsu plugin', function() {
 
   pack.server(8888, {
     labels: ['nodejitsu'],
     cors: true
   });
 
-  Lab.test('Plugin successfully registers', function(done) {
+  it('Plugin successfully registers', function(done) {
 
     pack.register({
       plugin: require('../../lib/server/plugins/nodejitsu'),
@@ -21,7 +21,7 @@ Lab.experiment('Nodejitsu plugin', function() {
         admin: ''
       }
     }, function (err) {
-      Lab.expect(err).to.not.exist;
+      expect(err).to.not.exist;
 
       done();
 

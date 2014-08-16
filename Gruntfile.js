@@ -31,21 +31,12 @@ module.exports = function (grunt) {
 
     nodeunit: {
       all: ['test/test-*.js']
-    },
-
-    lab : {
-      color: true,
-      leakDetection: false,
-      files:  [
-        'test/unit/nodejitsu_server-test.js'
-      ]
     }
 
   });
 
   grunt.registerTask('test', [
     'jshint',
-    'lab',
     'nodeunit:all',
     'simplemocha:full'
   ]);
