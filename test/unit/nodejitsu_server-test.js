@@ -1,16 +1,33 @@
-var expect = require('expect.js');
-var nju = require('../../lib/server/nodejitsu_server');
+var Lab = require('lab');
 
-var _ = require('lodash');
+var Hapi = require('hapi');
+var server = new Hapi.Server();
+var pack = server.pack;
 
-describe('nodejitsu_server', function () {
+Lab.experiment('Nodejitsu plugin', function() {
 
-  it('should expose n number of properties', function () {
-    expect(_.size(nju)).to.eql(2);
+  pack.server(8888, {
+    labels: ['nodejitsu'],
+    cors: true
   });
 
-  it('should export a module', function () {
-    expect(nju).to.be.an(Function);
+  Lab.test('Plugin successfully registers', function(done) {
+
+    pack.register({
+      plugin: require('../../lib/server/plugins/nodejitsu'),
+      options: {
+        app: {},
+        web: '',
+        admin: ''
+      }
+    }, function (err) {
+      Lab.expect(err).to.not.exist;
+
+      done();
+
+    });
+
   });
 
 });
+

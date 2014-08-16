@@ -43,8 +43,10 @@
     "grunt-contrib-jshint": "^0.6.2",
     "grunt-contrib-nodeunit": "^0.2.2",
     "grunt-contrib-watch": "^0.5.1",
+    "grunt-lab": "^1.0.3",
     "grunt-release-hoodie": "^2.5.0",
     "grunt-simple-mocha": "^0.4.0",
+    "lab": "^3.2.3",
     "load-grunt-tasks": "^0.4.0",
     "mocha": "*",
     "moment": "~2.6.0",
@@ -52,7 +54,9 @@
     "sinon": "^1.7.3"
   },
   "hoodie": {
-    "plugins": []
+    "plugins": [
+      "hoodie-plugin-users"
+    ]
   },
   "codename": "hunky-dory-cheetah"
 }
