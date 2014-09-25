@@ -1,7 +1,8 @@
 var expect = require('expect.js');
 var plugin = require('../../lib/server/plugins/api/index');
 
-var Stream = require('stream');
+var Wreck = require('wreck');
+
 var _ = require('lodash');
 
 describe('api plugin', function () {
